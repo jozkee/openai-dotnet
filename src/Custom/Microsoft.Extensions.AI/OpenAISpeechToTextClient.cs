@@ -7,6 +7,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using OpenAI;
 using OpenAI.Audio;
 
 namespace Microsoft.Extensions.AI;
@@ -25,7 +26,7 @@ internal sealed class OpenAISpeechToTextClient : ISpeechToTextClient
     /// <param name="audioClient">The underlying client.</param>
     public OpenAISpeechToTextClient(AudioClient audioClient)
     {
-        _ = Throw.IfNull(audioClient);
+        Argument.AssertNotNull(audioClient, nameof(audioClient));
 
         _audioClient = audioClient;
         _metadata = new("openai",
@@ -36,7 +37,7 @@ internal sealed class OpenAISpeechToTextClient : ISpeechToTextClient
     /// <inheritdoc />
     public object? GetService(Type serviceType, object? serviceKey = null)
     {
-        _ = Throw.IfNull(serviceType);
+        Argument.AssertNotNull(serviceType, nameof(serviceType));
 
         return
             serviceKey is not null ? null :
@@ -50,7 +51,7 @@ internal sealed class OpenAISpeechToTextClient : ISpeechToTextClient
     public async IAsyncEnumerable<SpeechToTextResponseUpdate> GetStreamingTextAsync(
         Stream audioSpeechStream, SpeechToTextOptions? options = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        _ = Throw.IfNull(audioSpeechStream);
+        Argument.AssertNotNull(audioSpeechStream, nameof(audioSpeechStream));
 
         var speechResponse = await GetTextAsync(audioSpeechStream, options, cancellationToken).ConfigureAwait(false);
 
@@ -64,7 +65,7 @@ internal sealed class OpenAISpeechToTextClient : ISpeechToTextClient
     public async Task<SpeechToTextResponse> GetTextAsync(
         Stream audioSpeechStream, SpeechToTextOptions? options = null, CancellationToken cancellationToken = default)
     {
-        _ = Throw.IfNull(audioSpeechStream);
+        Argument.AssertNotNull(audioSpeechStream, nameof(audioSpeechStream));
 
         SpeechToTextResponse response = new();
 
@@ -75,8 +76,6 @@ internal sealed class OpenAISpeechToTextClient : ISpeechToTextClient
 
         if (IsTranslationRequest(options))
         {
-            _ = Throw.IfNull(options);
-
             var openAIOptions = ToOpenAITranslationOptions(options);
             AudioTranslation translationResult;
 
@@ -130,7 +129,7 @@ internal sealed class OpenAISpeechToTextClient : ISpeechToTextClient
     /// <param name="audioTranscription">The OpenAI audio transcription.</param>
     private static void UpdateResponseFromOpenAIAudioTranscription(SpeechToTextResponse response, AudioTranscription audioTranscription)
     {
-        _ = Throw.IfNull(audioTranscription);
+        Argument.AssertNotNull(audioTranscription, nameof(audioTranscription));
 
         var segmentCount = audioTranscription.Segments.Count;
         var wordCount = audioTranscription.Words.Count;
@@ -205,7 +204,7 @@ internal sealed class OpenAISpeechToTextClient : ISpeechToTextClient
     /// <param name="audioTranslation">The OpenAI audio translation.</param>
     private static void UpdateResponseFromOpenAIAudioTranslation(SpeechToTextResponse response, AudioTranslation audioTranslation)
     {
-        _ = Throw.IfNull(audioTranslation);
+        Argument.AssertNotNull(audioTranslation, nameof(audioTranslation));
 
         var segmentCount = audioTranslation.Segments.Count;
 

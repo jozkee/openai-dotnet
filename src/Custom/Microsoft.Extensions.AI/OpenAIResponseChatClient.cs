@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using OpenAI;
 using OpenAI.Responses;
 
 namespace Microsoft.Extensions.AI;
@@ -30,7 +31,7 @@ internal sealed partial class OpenAIResponseChatClient : IChatClient
     /// <exception cref="ArgumentNullException"><paramref name="responseClient"/> is <see langword="null"/>.</exception>
     public OpenAIResponseChatClient(OpenAIResponseClient responseClient)
     {
-        _ = Throw.IfNull(responseClient);
+        Argument.AssertNotNull(responseClient, nameof(responseClient));
 
         _responseClient = responseClient;
         _metadata = new("openai",
@@ -41,7 +42,7 @@ internal sealed partial class OpenAIResponseChatClient : IChatClient
     /// <inheritdoc />
     object? IChatClient.GetService(Type serviceType, object? serviceKey)
     {
-        _ = Throw.IfNull(serviceType);
+        Argument.AssertNotNull(serviceType, nameof(serviceType));
 
         return
             serviceKey is not null ? null :
@@ -55,7 +56,7 @@ internal sealed partial class OpenAIResponseChatClient : IChatClient
     public async Task<ChatResponse> GetResponseAsync(
         IEnumerable<ChatMessage> messages, ChatOptions? options = null, CancellationToken cancellationToken = default)
     {
-        _ = Throw.IfNull(messages);
+        Argument.AssertNotNull(messages, nameof(messages));
 
         // Convert the inputs into what OpenAIResponseClient expects.
         var openAIResponseItems = ToOpenAIResponseItems(messages);
@@ -128,7 +129,7 @@ internal sealed partial class OpenAIResponseChatClient : IChatClient
     public async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
         IEnumerable<ChatMessage> messages, ChatOptions? options = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        _ = Throw.IfNull(messages);
+        Argument.AssertNotNull(messages, nameof(messages));
 
         // Convert the inputs into what OpenAIResponseClient expects.
         var openAIResponseItems = ToOpenAIResponseItems(messages);

@@ -30,7 +30,7 @@ internal sealed partial class OpenAIChatClient : IChatClient
     /// <exception cref="ArgumentNullException"><paramref name="chatClient"/> is <see langword="null"/>.</exception>
     public OpenAIChatClient(ChatClient chatClient)
     {
-        _ = Throw.IfNull(chatClient);
+        Argument.AssertNotNull(chatClient, nameof(chatClient));
 
         _chatClient = chatClient;
         _metadata = new("openai",
@@ -41,7 +41,7 @@ internal sealed partial class OpenAIChatClient : IChatClient
     /// <inheritdoc />
     object? IChatClient.GetService(Type serviceType, object? serviceKey)
     {
-        _ = Throw.IfNull(serviceType);
+        Argument.AssertNotNull(serviceType, nameof(serviceType));
 
         return
             serviceKey is not null ? null :
@@ -55,7 +55,7 @@ internal sealed partial class OpenAIChatClient : IChatClient
     public async Task<ChatResponse> GetResponseAsync(
         IEnumerable<ChatMessage> messages, ChatOptions? options = null, CancellationToken cancellationToken = default)
     {
-        _ = Throw.IfNull(messages);
+        Argument.AssertNotNull(messages, nameof(messages));
 
         var openAIChatMessages = ToOpenAIChatMessages(messages, AIJsonUtilities.DefaultOptions);
         var openAIOptions = ToOpenAIOptions(options);
@@ -70,7 +70,7 @@ internal sealed partial class OpenAIChatClient : IChatClient
     public IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
         IEnumerable<ChatMessage> messages, ChatOptions? options = null, CancellationToken cancellationToken = default)
     {
-        _ = Throw.IfNull(messages);
+        Argument.AssertNotNull(messages, nameof(messages));
 
         var openAIChatMessages = ToOpenAIChatMessages(messages, AIJsonUtilities.DefaultOptions);
         var openAIOptions = ToOpenAIOptions(options);
@@ -365,7 +365,7 @@ internal sealed partial class OpenAIChatClient : IChatClient
 
     private static ChatResponse FromOpenAIChatCompletion(ChatCompletion openAICompletion, ChatOptions? options, ChatCompletionOptions chatCompletionOptions)
     {
-        _ = Throw.IfNull(openAICompletion);
+        Argument.AssertNotNull(openAICompletion, nameof(openAICompletion));
 
         // Create the return message.
         ChatMessage returnMessage = new()

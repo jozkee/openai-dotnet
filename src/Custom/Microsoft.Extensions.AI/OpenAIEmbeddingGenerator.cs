@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using OpenAI;
 using OpenAI.Embeddings;
 
 namespace Microsoft.Extensions.AI;
@@ -28,10 +29,10 @@ internal sealed class OpenAIEmbeddingGenerator : IEmbeddingGenerator<string, Emb
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="defaultModelDimensions"/> is not positive.</exception>
     public OpenAIEmbeddingGenerator(EmbeddingClient embeddingClient, int? defaultModelDimensions = null)
     {
-        _ = Throw.IfNull(embeddingClient);
+        Argument.AssertNotNull(embeddingClient, nameof(embeddingClient));
         if (defaultModelDimensions < 1)
         {
-            Throw.ArgumentOutOfRangeException(nameof(defaultModelDimensions), "Value must be greater than 0.");
+            throw new ArgumentOutOfRangeException(nameof(defaultModelDimensions), "Value must be greater than 0.");
         }
 
         _embeddingClient = embeddingClient;
@@ -73,7 +74,7 @@ internal sealed class OpenAIEmbeddingGenerator : IEmbeddingGenerator<string, Emb
     /// <inheritdoc />
     object? IEmbeddingGenerator.GetService(Type serviceType, object? serviceKey)
     {
-        _ = Throw.IfNull(serviceType);
+        Argument.AssertNotNull(serviceType, nameof(serviceType));
 
         return
             serviceKey is not null ? null :
