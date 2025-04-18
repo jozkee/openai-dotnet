@@ -67,7 +67,7 @@ namespace OpenAI;
 [CodeGenSuppress("GetVectorStoreClient")]
 public partial class OpenAIClient
 {
-    private const string OpenAIV1Endpoint = "https://api.openai.com/v1";
+    internal const string OpenAIV1Endpoint = "https://api.openai.com/v1";
 
     private static class KnownHeaderNames
     {

@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
@@ -28,7 +27,7 @@ namespace Microsoft.Extensions.AI;
 internal sealed partial class OpenAIChatClient : IChatClient
 {
     /// <summary>Gets the default OpenAI endpoint.</summary>
-    private static Uri DefaultOpenAIEndpoint { get; } = new("https://api.openai.com/v1");
+    internal static Uri DefaultOpenAIEndpoint { get; } = new(OpenAIClient.OpenAIV1Endpoint);
 
     /// <summary>Metadata about the client.</summary>
     private readonly ChatClientMetadata _metadata;
@@ -44,17 +43,9 @@ internal sealed partial class OpenAIChatClient : IChatClient
         _ = Throw.IfNull(chatClient);
 
         _chatClient = chatClient;
-
-        // https://github.com/openai/openai-dotnet/issues/215
-        // The endpoint and model aren't currently exposed, so use reflection to get at them, temporarily. Once packages
-        // implement the abstractions directly rather than providing adapters on top of the public APIs,
-        // the package can provide such implementations separate from what's exposed in the public API.
-        Uri providerUrl = typeof(ChatClient).GetField("_endpoint", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-            ?.GetValue(chatClient) as Uri ?? DefaultOpenAIEndpoint;
-        string? model = typeof(ChatClient).GetField("_model", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-            ?.GetValue(chatClient) as string;
-
-        _metadata = new("openai", providerUrl, model);
+        _metadata = new("openai",
+            chatClient.Endpoint ?? DefaultOpenAIEndpoint,
+            chatClient.Model);
     }
 
     /// <inheritdoc />
@@ -814,9 +805,6 @@ public static class OpenAIClientExtensions
 /// <summary>An <see cref="IEmbeddingGenerator{String, Embedding}"/> for an OpenAI <see cref="EmbeddingClient"/>.</summary>
 internal sealed class OpenAIEmbeddingGenerator : IEmbeddingGenerator<string, Embedding<float>>
 {
-    /// <summary>Default OpenAI endpoint.</summary>
-    private const string DefaultOpenAIEndpoint = "https://api.openai.com/v1";
-
     /// <summary>Metadata about the embedding generator.</summary>
     private readonly EmbeddingGeneratorMetadata _metadata;
 
@@ -841,19 +829,10 @@ internal sealed class OpenAIEmbeddingGenerator : IEmbeddingGenerator<string, Emb
 
         _embeddingClient = embeddingClient;
         _dimensions = defaultModelDimensions;
-
-        // https://github.com/openai/openai-dotnet/issues/215
-        // The endpoint and model aren't currently exposed, so use reflection to get at them, temporarily. Once packages
-        // implement the abstractions directly rather than providing adapters on top of the public APIs,
-        // the package can provide such implementations separate from what's exposed in the public API.
-        string providerUrl = (typeof(EmbeddingClient).GetField("_endpoint", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-            ?.GetValue(embeddingClient) as Uri)?.ToString() ??
-            DefaultOpenAIEndpoint;
-
-        FieldInfo? modelField = typeof(EmbeddingClient).GetField("_model", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-        string? modelId = modelField?.GetValue(embeddingClient) as string;
-
-        _metadata = CreateMetadata("openai", providerUrl, modelId, defaultModelDimensions);
+        _metadata = CreateMetadata("openai",
+            embeddingClient.Endpoint ?? OpenAIChatClient.DefaultOpenAIEndpoint,
+            embeddingClient.Model,
+            defaultModelDimensions);
     }
 
     /// <inheritdoc />
@@ -898,8 +877,8 @@ internal sealed class OpenAIEmbeddingGenerator : IEmbeddingGenerator<string, Emb
     }
 
     /// <summary>Creates the <see cref="EmbeddingGeneratorMetadata"/> for this instance.</summary>
-    private static EmbeddingGeneratorMetadata CreateMetadata(string providerName, string providerUrl, string? defaultModelId, int? defaultModelDimensions) =>
-        new(providerName, Uri.TryCreate(providerUrl, UriKind.Absolute, out Uri? providerUri) ? providerUri : null, defaultModelId, defaultModelDimensions);
+    private static EmbeddingGeneratorMetadata CreateMetadata(string providerName, Uri providerUri, string? defaultModelId, int? defaultModelDimensions) =>
+        new(providerName, providerUri, defaultModelId, defaultModelDimensions);
 
     /// <summary>Converts an extensions options instance to an OpenAI options instance.</summary>
     private OpenAI.Embeddings.EmbeddingGenerationOptions? ToOpenAIOptions(EmbeddingGenerationOptions? options)
@@ -924,9 +903,6 @@ internal sealed class OpenAIEmbeddingGenerator : IEmbeddingGenerator<string, Emb
 /// <summary>Represents an <see cref="IChatClient"/> for an <see cref="OpenAIResponseClient"/>.</summary>
 internal sealed partial class OpenAIResponseChatClient : IChatClient
 {
-    /// <summary>Gets the default OpenAI endpoint.</summary>
-    private static Uri DefaultOpenAIEndpoint { get; } = new("https://api.openai.com/v1");
-
     /// <summary>A <see cref="ChatRole"/> for "developer".</summary>
     private static readonly ChatRole _chatRoleDeveloper = new("developer");
 
@@ -944,17 +920,9 @@ internal sealed partial class OpenAIResponseChatClient : IChatClient
         _ = Throw.IfNull(responseClient);
 
         _responseClient = responseClient;
-
-        // https://github.com/openai/openai-dotnet/issues/215
-        // The endpoint and model aren't currently exposed, so use reflection to get at them, temporarily. Once packages
-        // implement the abstractions directly rather than providing adapters on top of the public APIs,
-        // the package can provide such implementations separate from what's exposed in the public API.
-        Uri providerUrl = typeof(OpenAIResponseClient).GetField("_endpoint", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-            ?.GetValue(responseClient) as Uri ?? DefaultOpenAIEndpoint;
-        string? model = typeof(OpenAIResponseClient).GetField("_model", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-            ?.GetValue(responseClient) as string;
-
-        _metadata = new("openai", providerUrl, model);
+        _metadata = new("openai",
+            responseClient.Endpoint ?? OpenAIChatClient.DefaultOpenAIEndpoint,
+            responseClient.Model);
     }
 
     /// <inheritdoc />
@@ -1523,9 +1491,6 @@ internal sealed partial class OpenAIResponseChatClient : IChatClient
 [Experimental("MEAI001")]
 internal sealed class OpenAISpeechToTextClient : ISpeechToTextClient
 {
-    /// <summary>Default OpenAI endpoint.</summary>
-    private static readonly Uri _defaultOpenAIEndpoint = new("https://api.openai.com/v1");
-
     /// <summary>Metadata about the client.</summary>
     private readonly SpeechToTextClientMetadata _metadata;
 
@@ -1539,17 +1504,9 @@ internal sealed class OpenAISpeechToTextClient : ISpeechToTextClient
         _ = Throw.IfNull(audioClient);
 
         _audioClient = audioClient;
-
-        // https://github.com/openai/openai-dotnet/issues/215
-        // The endpoint and model aren't currently exposed, so use reflection to get at them, temporarily. Once packages
-        // implement the abstractions directly rather than providing adapters on top of the public APIs,
-        // the package can provide such implementations separate from what's exposed in the public API.
-        Uri providerUrl = typeof(AudioClient).GetField("_endpoint", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-            ?.GetValue(audioClient) as Uri ?? _defaultOpenAIEndpoint;
-        string? model = typeof(AudioClient).GetField("_model", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-            ?.GetValue(audioClient) as string;
-
-        _metadata = new("openai", providerUrl, model);
+        _metadata = new("openai",
+            audioClient.Endpoint ?? OpenAIChatClient.DefaultOpenAIEndpoint,
+            audioClient.Model);
     }
 
     /// <inheritdoc />
