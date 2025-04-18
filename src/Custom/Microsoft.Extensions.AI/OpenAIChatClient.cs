@@ -13,7 +13,7 @@ using OpenAI.Chat;
 
 namespace Microsoft.Extensions.AI;
 
-/// <summary>Represents an <see cref="IChatClient"/> for an OpenAI <see cref="OpenAIClient"/> or <see cref="ChatClient"/>.</summary>
+/// <summary>Represents an <see cref="IChatClient"/> for an OpenAI <see cref="ChatClient"/>.</summary>
 internal sealed partial class OpenAIChatClient : IChatClient
 {
     /// <summary>Gets the default OpenAI endpoint.</summary>

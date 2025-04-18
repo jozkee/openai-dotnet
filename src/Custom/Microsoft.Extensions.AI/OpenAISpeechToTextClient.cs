@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -12,8 +11,9 @@ using OpenAI.Audio;
 
 namespace Microsoft.Extensions.AI;
 
+#pragma warning disable MEAI001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
 /// <summary>Represents an <see cref="ISpeechToTextClient"/> for an OpenAI <see cref="OpenAIClient"/> or <see cref="OpenAI.Audio.AudioClient"/>.</summary>
-[Experimental("MEAI001")]
 internal sealed class OpenAISpeechToTextClient : ISpeechToTextClient
 {
     /// <summary>Metadata about the client.</summary>

@@ -17,21 +17,21 @@ public static class OpenAIClientExtensions
     /// <summary>Gets an <see cref="IChatClient"/> for use with this <see cref="ChatClient"/>.</summary>
     /// <param name="chatClient">The client.</param>
     /// <returns>An <see cref="IChatClient"/> that can be used to converse via the <see cref="ChatClient"/>.</returns>
-    [Experimental("MEAI001")]
+    [Experimental("OPENAI003")]
     public static IChatClient AsIChatClient(this ChatClient chatClient) =>
         new OpenAIChatClient(chatClient);
 
     /// <summary>Gets an <see cref="IChatClient"/> for use with this <see cref="OpenAIResponseClient"/>.</summary>
     /// <param name="responseClient">The client.</param>
     /// <returns>An <see cref="IChatClient"/> that can be used to converse via the <see cref="OpenAIResponseClient"/>.</returns>
-    [Experimental("MEAI001")]
+    [Experimental("OPENAI003")]
     public static IChatClient AsIChatClient(this OpenAIResponseClient responseClient) =>
         new OpenAIResponseChatClient(responseClient);
 
     /// <summary>Gets an <see cref="ISpeechToTextClient"/> for use with this <see cref="AudioClient"/>.</summary>
     /// <param name="audioClient">The client.</param>
     /// <returns>An <see cref="ISpeechToTextClient"/> that can be used to transcribe audio via the <see cref="AudioClient"/>.</returns>
-    [Experimental("MEAI001")]
+    [Experimental("OPENAI003")]
     public static ISpeechToTextClient AsISpeechToTextClient(this AudioClient audioClient) =>
         new OpenAISpeechToTextClient(audioClient);
 
@@ -39,7 +39,7 @@ public static class OpenAIClientExtensions
     /// <param name="embeddingClient">The client.</param>
     /// <param name="defaultModelDimensions">The number of dimensions to generate in each embedding.</param>
     /// <returns>An <see cref="IEmbeddingGenerator{String, Embedding}"/> that can be used to generate embeddings via the <see cref="EmbeddingClient"/>.</returns>
-    [Experimental("MEAI001")]
+    [Experimental("OPENAI003")]
     public static IEmbeddingGenerator<string, Embedding<float>> AsIEmbeddingGenerator(this EmbeddingClient embeddingClient, int? defaultModelDimensions = null) =>
         new OpenAIEmbeddingGenerator(embeddingClient, defaultModelDimensions);
 }
