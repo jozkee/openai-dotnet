@@ -485,6 +485,7 @@ internal sealed partial class OpenAIChatClient : IChatClient
 
         if (options is not null)
         {
+            result.Model = options.ModelId;
             result.FrequencyPenalty = options.FrequencyPenalty;
             result.MaxOutputTokenCount = options.MaxOutputTokens;
             result.TopP = options.TopP;
@@ -1176,6 +1177,7 @@ internal sealed partial class OpenAIResponseChatClient : IChatClient
         if (options is not null)
         {
             // Handle strongly-typed properties.
+            result.Model = options.ModelId;
             result.MaxOutputTokenCount = options.MaxOutputTokens;
             result.PreviousResponseId = options.ChatThreadId;
             result.TopP = options.TopP;
@@ -1643,6 +1645,7 @@ internal sealed class OpenAISpeechToTextClient : ISpeechToTextClient
 
         if (options is not null)
         {
+            result.Model = options.ModelId;
             if (options.SpeechLanguage is not null)
             {
                 result.Language = options.SpeechLanguage;
@@ -1711,6 +1714,7 @@ internal sealed class OpenAISpeechToTextClient : ISpeechToTextClient
 
         if (options is not null)
         {
+            result.Model = options.ModelId;
             if (options.AdditionalProperties is { Count: > 0 } additionalProperties)
             {
                 if (additionalProperties.TryGetValue(nameof(result.Temperature), out float? temperature))
